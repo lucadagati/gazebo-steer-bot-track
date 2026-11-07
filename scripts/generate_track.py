@@ -1,5 +1,16 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
+"""Spawn a slalom test track in Gazebo for the steer_bot robot.
 
+Builds a sinusoidal centre line, lays road segments along it, places yellow
+(left) and blue (right) cones on both edges and scatters trees away from the
+road. Requires a running Gazebo with the steer_bot namespace (ROS) and the
+models installed via scripts/install_models.sh.
+
+Usage: rosrun/python3 scripts/generate_track.py [--seed N]
+"""
+
+import argparse
+import os
 import rospy
 import math
 import numpy as np
@@ -22,11 +33,12 @@ def read_file_sdf(filename):
     with open(filename, 'r') as file:
         return file.read()
 
-# Read the model content
-MODEL_CONTENT_CONE_LEFT = read_file_sdf('./steer_bot/cone_yellow/model.sdf')
-MODEL_CONTENT_CONE_RIGHT = read_file_sdf('./steer_bot/cone_blue/model.sdf')
-MODEL_CONTENT_ROAD = read_file_sdf('./steer_bot/road.sdf')
-MODEL_CONTENT_TREE = read_file_sdf('./steer_bot/tree.sdf')
+# Read the model content (paths are relative to the repository, not to the cwd)
+ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+MODEL_CONTENT_CONE_LEFT = read_file_sdf(os.path.join(ROOT, 'models', 'cone_yellow', 'model.sdf'))
+MODEL_CONTENT_CONE_RIGHT = read_file_sdf(os.path.join(ROOT, 'models', 'cone_blue', 'model.sdf'))
+MODEL_CONTENT_ROAD = read_file_sdf(os.path.join(ROOT, 'templates', 'road.sdf'))
+MODEL_CONTENT_TREE = read_file_sdf(os.path.join(ROOT, 'templates', 'tree.sdf'))
 
 # Generate the primary trajectory
 def generate_trajectory():
@@ -46,7 +58,9 @@ def spawn(name, x, y, z, model_content):
     rospy.loginfo(response.status_message)
 
 # Main function
-def node():
+def node(seed=None):
+    if seed is not None:
+        random.seed(seed)
     rospy.init_node('spawn_model')
     rospy.wait_for_service('steer_bot/gazebo/spawn_sdf_model')
 
@@ -111,4 +125,7 @@ def node():
         rospy.logerr("Error during service invocation: %s", str(exc))
 
 if __name__ == '__main__':
-    node()
+    parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
+    parser.add_argument('--seed', type=int, default=None, help='seed for tree placement')
+    args, _ = parser.parse_known_args()  # ignore ROS remapping arguments
+    node(args.seed)
