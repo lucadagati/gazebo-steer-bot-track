@@ -1,6 +1,6 @@
 # Gazebo steer_bot track generator
 
-Utilities to build a **slalom test track** for the [`steer_bot`](https://github.com/CIR-KIT/steer_drive_ros) Ackermann/steering robot in Gazebo: a sinusoidal road lined with yellow (left) and blue (right) traffic cones — the layout used in autonomous-racing style tests — plus randomly placed trees.
+Utilities to build a **slalom test track** for the `steer_bot` steering robot in Gazebo: a sinusoidal road lined with yellow (left) and blue (right) traffic cones — the layout used in autonomous-racing style tests — plus randomly placed trees.
 
 ## Contents
 
